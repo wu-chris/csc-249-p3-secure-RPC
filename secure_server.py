@@ -62,7 +62,16 @@ def TLS_handshake_server(connection):
     #    * A signed certificate variable should be available as 'signed_certificate'
     #  * Receive an encrypted symmetric key from the client
     #  * Return the symmetric key for use in further communications with the client
-    return 0
+    try:
+        connection.sendall(bytes(signed_certificate, 'utf-8'))
+        encrypted_key = connection.recv(1024)
+        session_key = cryptgraphy_simulator.decrypt_with_private_key(encrypted_key, private_key)
+        socket.sendall(b"SESSION_ESTABLISHED")
+        print("[SERVER] Secure session established.")
+        return session_key
+    except Exception as e:
+        print(f"[SERVER ERROR] {e}")
+        return None
 
 def process_message(message):
     # Change this function to change the service your server provides

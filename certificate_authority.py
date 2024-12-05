@@ -13,6 +13,7 @@ parser.add_argument('--CA_port', help='Port number at which to host the certific
 parser.add_argument('--public_key', default=None, type=arguments._public_key, help='Public key for the certificate authority as a tuple')
 args = parser.parse_args()
 
+
 CA_IP = args.CA_IP  # Address to listen on
 CA_PORT = args.CA_port  # Port to listen on (non-privileged ports are > 1023)
 

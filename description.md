@@ -58,3 +58,65 @@ This allows injection attacks and the attacker could execute untrusted code on u
 6. Acknowledgements
 I discussed with Zhirou Liu, Quinn He, and Isabelle Wang on this project.
 
+## Command-line traces
+### Certificate Authority Trace
+python3 certificate_authority.py
+Certificate Authority started using public key '(7525, 56533)' and private key '49008'
+Certificate authority starting - listening for connections at IP 127.0.0.1 and port 55553
+Connected established with ('127.0.0.1', 60712)
+Received client message: 'b'$(36257, 56533)|127.0.0.1|65432'' [31 bytes]
+Signing '(36257, 56533)|127.0.0.1|65432' and returning it to the client.
+Received client message: 'b'done'' [4 bytes]
+('127.0.0.1', 60712) has closed the remote connection - listening 
+Connected established with ('127.0.0.1', 60713)
+Received client message: 'b'key'' [3 bytes]
+Sending the certificate authority's public key (7525, 56533) to the client
+Received client message: 'b'done'' [4 bytes]
+
+### Server Trace
+python3 secure_server.py
+Generated public key '(36257, 56533)' and private key '20276'
+Connecting to the certificate authority at IP 127.0.0.1 and port 55553
+Prepared the formatted unsigned certificate '(36257, 56533)|127.0.0.1|65432'
+Connection established, sending certificate '(36257, 56533)|127.0.0.1|65432' to the certificate authority to be signed
+Received signed certificate 'D_(49008, 56533)[(36257, 56533)|127.0.0.1|65432]' from the certificate authority
+server starting - listening for connections at IP 127.0.0.1 and port 65432
+Connected established with ('127.0.0.1', 60715)
+Received handshake request: TLS_HANDSHAKE_INIT
+Sending signed certificate 'D_(49008, 56533)[(36257, 56533)|127.0.0.1|65432]' to the client
+Received encrypted symmetric key 'E_(36257, 56533)[52859]' from the client
+Decrypted symmetric key: 52859
+TLS handshake complete: established symmetric key '52859', acknowledging to client
+Received client message: 'b'HMAC_32162[symmetric_52859[Hello, Secure Server!]]'' [50 bytes]
+Decoded message 'Hello, Secure Server!' from client
+Responding 'Hello, Secure Server!' to the client
+Sending encoded response 'HMAC_32162[symmetric_52859[Hello, Secure Server!]]' back to the client
+server is done!
+### VPN Trace
+python3 VPN.py
+VPN starting - listening for connections at IP 127.0.0.1 and port 55554
+Connected established with ('127.0.0.1', 60714)
+Received client message: 'b'127.0.0.1~IP~65432~port~TLS_HANDSHAKE_INIT'' [42 bytes]
+connecting to server at IP 127.0.0.1 and port 65432
+server connection established, sending message 'TLS_HANDSHAKE_INIT'
+message sent to server, waiting for reply
+Received server response: 'b'D_(49008, 56533)[(36257, 56533)|127.0.0.1|65432]'' [48 bytes], forwarding to client
+Received client message: 'b'E_(36257, 56533)[52859]'' [23 bytes], forwarding to server
+Received server response: 'b"symmetric_52859[Symmetric key '52859' received]"' [47 bytes], forwarding to client
+Received client message: 'b'HMAC_32162[symmetric_52859[Hello, Secure Server!]]'' [50 bytes], forwarding to server
+Received server response: 'b'HMAC_32162[symmetric_52859[Hello, Secure Server!]]'' [50 bytes], forwarding to client
+VPN is done!
+### Client Trace
+python3 secure_client.py --server_IP 127.0.0.1 --server_port 65432 --VPN_IP 127.0.0.1 --VPN_port 55554 --CA_IP 127.0.0.1 --CA_port 55553 --message Hello, Secure Server!
+Connecting to the certificate authority at IP 127.0.0.1 and port 55553
+Connection established, requesting public key
+Received public key (7525, 56533) from the certificate authority for verifying certificates
+Client starting - connecting to VPN at IP 127.0.0.1 and port 55554
+Received signed certificate: D_(49008, 56533)[(36257, 56533)|127.0.0.1|65432]
+TLS handshake complete: sent symmetric key '52859', waiting for acknowledgement
+Received acknowledgement 'Symmetric key '52859' received', preparing to send message
+Sending message 'HMAC_32162[symmetric_52859[Hello, Secure Server!]]' to the server
+Message sent, waiting for reply
+Received raw response: 'b'HMAC_32162[symmetric_52859[Hello, Secure Server!]]'' [50 bytes]
+Decoded message 'Hello, Secure Server!' from server
+client is done!

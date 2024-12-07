@@ -13,7 +13,6 @@ parser.add_argument('--CA_port', help='Port number at which to host the certific
 parser.add_argument('--public_key', default=None, type=arguments._public_key, help='Public key for the certificate authority as a tuple')
 args = parser.parse_args()
 
-
 CA_IP = args.CA_IP  # Address to listen on
 CA_PORT = args.CA_port  # Port to listen on (non-privileged ports are > 1023)
 
@@ -22,6 +21,8 @@ if args.public_key == None:
     args.public_key = cryptgraphy_simulator.asymmetric_key_gen()[0]
 public_key = args.public_key
 private_key = public_key[1] - public_key[0]
+
+print(f"Certificate Authority started using public key '{public_key}' and private key '{private_key}'")
 
 def sign_certificate(certificate):
     return 'D' + cryptgraphy_simulator.public_key_encrypt((private_key, public_key[1]), certificate)[1:]
